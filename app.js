@@ -14,7 +14,13 @@ app.use(express.json())
 const publicDirectoryPath = path.join(__dirname, '../public')
 app.use(express.static(publicDirectoryPath))
 
+//Using the Routes Here
+//----------------
+
 app.use(entry(db))
+
+
+//----------------
 
 app.get('/', (_, res) => {
     res.send("Welcome to Libra - an API for Online Voting")
