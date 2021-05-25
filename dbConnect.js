@@ -4,7 +4,7 @@ const db = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
     password : dbrootpass 
-    //,database : 'ovsdevdb1'
+    //,database : 'ovsdevdb1' //comment this before the db dbname is created
 })
 
 db.connect((err) => {
