@@ -1,5 +1,5 @@
 {
-  "name": "online-voting-server",
+  "name": "libra",
   "version": "1.0.0",
   "description": "An api to conduct voting online ",
   "main": "app.js",

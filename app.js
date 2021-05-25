@@ -18,7 +18,7 @@ app.use(express.static(publicDirectoryPath))
 app.use(entry(db))
 
 app.get('/', (_, res) => {
-    res.send("Welcome to ICast - an API for Online Voting")
+    res.send("Welcome to Libra - an API for Online Voting")
 })
 
 app.get('*',(_,res)=>{
