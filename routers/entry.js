@@ -3,18 +3,8 @@ const auth = require('../auth');
 const db = require('../dbConnect');
 const verify = require('../verify')
 const util = require( 'util' );
-const mysql = require( 'mysql' );
 const { createCipher } = require('crypto');
-
-const useQuery = (connection,sql,args) => {
-    return new Promise( ( resolve, reject ) => {
-        connection.query( sql, args, ( err, rows ) => {
-            if ( err )
-                return reject( err );
-            resolve( rows );
-        } );
-    } );
-}
+const useQuery = require('../useQuery')
 
 var validateEmailSyntax = (email) => {
     let dot=0, atr=0;
@@ -30,7 +20,7 @@ var validateUsernameSyntax = (un) =>{
     let ac;
     for(let i=0; i<un.length; ++i){
         ac = un.charCodeAt(i);
-        if(!(ac >=48 && ac <= 57) || (ac >= 65 && ac <= 90) || (ac>=97 && ac<=122)){
+        if(!((ac >=48 && ac <= 57) || (ac >= 65 && ac <= 90) || (ac>=97 && ac<=122))){
             return false;
         }
     }
