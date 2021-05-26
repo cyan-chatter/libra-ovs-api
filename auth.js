@@ -15,15 +15,15 @@ const verifyToken = (token) => {
     return decoded
 }
 
-const hashWithSalt = (password) => {
+const hashWithSalt = async (password) => {
     return bcrypt.hash(password, 8)    
 }
 
-const comparePassword = (word,hash) => {
+const comparePassword = async (word,hash) => {
     return bcrypt.compare(word, hash)
 }
 
-const generateAuthToken = async function (client){
+const generateAuthToken = function (client){
     const token = jwt.sign({username: client.username.toString()},secretKey)
     return token 
 }

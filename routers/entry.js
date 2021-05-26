@@ -135,7 +135,6 @@ var createRouter =  function (config){
             const isMatch = await auth.comparePassword(word, hash);
             if(isMatch){
                 token = auth.generateAuthToken(user)
-                //sql query - save the token into userTokens table
                 let tableName = `userTokensFor${user.username}`
                 let sql2 = `INSERT INTO ${tableName} VALUES (?)` 
                 db.query(sql2, [token], (err,result)=>{
@@ -159,7 +158,8 @@ var createRouter =  function (config){
 
     router.get('/logout', verify(), async (req,res)=>{
         let tableName = `userTokensFor${req.user.username}`
-        db.query('DELETE FROM ? WHERE token = ?', [tableName, req.token], (err,result)=>{
+        let sql = `DELETE FROM ${tableName} WHERE token = ?`
+        db.query(sql, [req.token], (err,result)=>{
             if(err) throw err;
             console.log(result)
             res.status(200).send("User is Logged Out")
