@@ -10,61 +10,29 @@ const secretKey = process.env.JWT_SECRET || 'TotalOverdose'
 //     }
 // })
 
-const generateAuthToken = async function (){
-    const client = this
-    const token = jwt.sign({_id: client._id.toString()},secretKey)
-    client.tokens = client.tokens.concat({token})
-    //await client.save()
+const verifyToken = (token) => {
+    const decoded = jwt.verify(token, secretKey)
+    return decoded
+}
+
+const hashWithSalt = (password) => {
+    return bcrypt.hash(password, 8)    
+}
+
+const comparePassword = (word,hash) => {
+    return bcrypt.compare(word, hash)
+}
+
+const generateAuthToken = async function (client){
+    const token = jwt.sign({username: client.username.toString()},secretKey)
     return token 
 }
 
-const prepasswordsave = async function(next){
-    const client = this
-    if(client.isModified('password')){
-        client.password = await bcrypt.hash(client.password, 8)
-    }
-    next()
+const auth = {
+    hashWithSalt,
+    comparePassword,
+    generateAuthToken,
+    verifyToken
 }
 
-const findByCredentials = async (email, password) =>{
-    
-    let client
-
-    //client = await client.findOne({ email })
-
-    if(!client){
-        throw new Error('E-mail not registered')
-    }
-    const isMatch = await bcrypt.compare(password, client.password)
-    
-    if(!isMatch){
-        throw new Error('Incorrect Password')
-    }
-
-    return client
-}
-
-
-const auth = (type)=>{
-    return async(req, res, next)=>{
-        try{ 
-            const token = req.cookies.token
-            const decoded = jwt.verify(token, secretKey)
-            let user;
-            //user = await client.findOne({_id: decoded._id, 'tokens.token':token}) 
-            if (!user) {
-            throw new Error()
-            }
-        req.token = token
-        req.user = user
-        req.user_type= type
-        next()
-        }catch(e){
-            res.clearCookie('token')
-            res.status(401).send({
-                status:'401 :(',
-                message: 'Please Authenticate Properly'
-             })
-        }
-    }
-} 
+module.exports = auth
