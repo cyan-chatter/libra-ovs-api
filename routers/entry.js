@@ -2,6 +2,19 @@ const express = require('express');
 const auth = require('../auth');
 const db = require('../dbConnect');
 const verify = require('../verify')
+const util = require( 'util' );
+const mysql = require( 'mysql' );
+const { createCipher } = require('crypto');
+
+const useQuery = (connection,sql,args) => {
+    return new Promise( ( resolve, reject ) => {
+        connection.query( sql, args, ( err, rows ) => {
+            if ( err )
+                return reject( err );
+            resolve( rows );
+        } );
+    } );
+}
 
 var validateEmailSyntax = (email) => {
     let dot=0, atr=0;
@@ -13,34 +26,25 @@ var validateEmailSyntax = (email) => {
     return false;
 }
 
-var isUsernameAlreadyTakenOrInvalid = (un) => {
-    
+var validateUsernameSyntax = (un) =>{
+    let ac;
     for(let i=0; i<un.length; ++i){
-        let ac = un.charCodeAt(i);
-        if(!((ac >=48 && ac <= 57) || (ac >= 65 && ac <= 90) && (ac>=97 && ac<=122))){
+        ac = un.charCodeAt(i);
+        if(!(ac >=48 && ac <= 57) || (ac >= 65 && ac <= 90) || (ac>=97 && ac<=122)){
             return false;
         }
     }
-    
-    let sql = 'SELECT * FROM users WHERE username = ?'
-    db.query(sql, [un], (err,result)=>{
-        if(err) throw err;
-        console.log(result);
-        if(result.length > 0) return true;
-        else return false;
-    })
-    
+    return true;
 }
 
-var isEmailAreadyUsed = (email) => {
+var isUsernameAlreadyTaken = async (un) => {
+    let sql = 'SELECT * FROM users WHERE username = ?'
+    return useQuery(db, sql, [un])
+}
+
+var isEmailAreadyUsed = async (email) => {
     let sql = 'SELECT * FROM users WHERE email = ?'
-    db.query(sql, [email], (err,result)=>{
-        if(err) throw err;
-        console.log(result);
-        if(result.length > 0) return true;
-        else return false; 
-    })
-    
+    return useQuery(db, sql, [email])
 }
 
 var createRouter =  function (config){
@@ -55,41 +59,62 @@ var createRouter =  function (config){
 
         if(!req.body) res.status(400).send('Invalid Request Syntax')
         if(!validateEmailSyntax(req.body.email)){
-            res.status(400).send('Invalid Email Syntax')
+            return res.status(400).send('Invalid Email Syntax')
         }
-        if(isUsernameAlreadyTakenOrInvalid(req.body.username)){
-            res.status(409).send('Username Alerady Taken')
+        if(!validateUsernameSyntax(req.body.username)){
+            return res.status(400).send('Invalid Username Syntax')
         }
-        if(isEmailAreadyUsed(req.body.email)){
-            res.status(409).send('A User Has Already Registered With This Email')
-        }
-        if(req.body.password.length < 8) res.status(406).send('Password Must Have Atleast 8 Characters')
-        //409- conflict, 406 - not acceptable
-
-        const hashedPassword = await auth.hashWithSalt(req.body.password)
-        
-        const userData = { 
-            username : req.body.username,
-            name : req.body.name,
-            email : req.body.email,
-            age : req.body.age,
-            password : hashedPassword
-        }
-
-        let sql1 = 'INSERT INTO users SET ?';
-        db.query(sql1, userData, (err, result) => {
-            if(err) throw err;
-            console.log(result);
-            const tableName = 'userTokensFor' + userData.username
-            let sql2 = `CREATE TABLE ${tableName}(token VARCHAR(255))`;
-            
-            db.query(sql2, (err,result)=>{
-                if(err) throw err;
-                console.log(result);
-                res.status(200).send('User Added Successfully');
+        let d1;
+        isUsernameAlreadyTaken(req.body.username)
+        .then(result=>{
+            console.log("username check runs", result);
+            if(result.length > 0) d1 = true;
+            else d1 = false;
+        })  
+        .then(()=>{
+            if(d1){
+                return res.status(409).send('Username Alerady Taken')
+            }
+            let d2; 
+            isEmailAreadyUsed(req.body.email)
+            .then(result=>{
+                console.log("email check runs", result);
+                if(result.length > 0) d2 = true;
+                else d2 = false;
             })
-        });
+            .then(async ()=>{
+                if(d2){
+                    return res.status(409).send('A User Has Already Registered With This Email')
+                }
+                if(req.body.password.length < 8) res.status(406).send('Password Must Have Atleast 8 Characters')
+                //409- conflict, 406 - not acceptable
     
+                const hashedPassword = await auth.hashWithSalt(req.body.password)
+                
+                const userData = { 
+                    username : req.body.username,
+                    name : req.body.name,
+                    email : req.body.email,
+                    age : req.body.age,
+                    password : hashedPassword
+                }
+
+                let sql1 = 'INSERT INTO users SET ?';
+                db.query(sql1, userData, (err, result) => {
+                    if(err) throw err;
+                    console.log(result);
+                    const tableName = 'userTokensFor' + userData.username
+                    let sql2 = `CREATE TABLE ${tableName}(token VARCHAR(255))`;
+                    
+                    db.query(sql2, (err,result)=>{
+                        if(err) throw err;
+                        console.log(result);
+                        res.status(200).send('User Added Successfully');
+                    })
+                })
+            })
+        })
+        
     })
 
 
