@@ -1,5 +1,4 @@
 const express = require('express');
-const { verify } = require('jsonwebtoken');
 const auth = require('../auth');
 const db = require('../dbConnect');
 const verify = require('../verify')
@@ -16,14 +15,14 @@ var validateEmailSyntax = (email) => {
 
 var isUsernameAlreadyTakenOrInvalid = (un) => {
     
-    for(let u=0; i<un.length; ++i){
+    for(let i=0; i<un.length; ++i){
         let ac = un.charCodeAt(i);
         if(!((ac >=48 && ac <= 57) || (ac >= 65 && ac <= 90) && (ac>=97 && ac<=122))){
             return false;
         }
     }
     
-    let sql = 'SELECT * FROM `users` WHERE `username` = ?'
+    let sql = 'SELECT * FROM users WHERE username = ?'
     db.query(sql, [un], (err,result)=>{
         if(err) throw err;
         console.log(result);
@@ -34,7 +33,7 @@ var isUsernameAlreadyTakenOrInvalid = (un) => {
 }
 
 var isEmailAreadyUsed = (email) => {
-    let sql = 'SELECT * FROM `users` WHERE `email` = ?'
+    let sql = 'SELECT * FROM users WHERE email = ?'
     db.query(sql, [email], (err,result)=>{
         if(err) throw err;
         console.log(result);
@@ -142,7 +141,7 @@ var createRouter =  function (config){
         })
     })
 
-    
+
     return router
 }
 module.exports = createRouter

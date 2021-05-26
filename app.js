@@ -41,14 +41,14 @@ app.get('/', (_, res) => {
 // });
 
 // // Create table
-app.get('/createuserstable', (req, res) => {
-    let sql = 'CREATE TABLE users(id int UNIQUE NOT_NULL AUTO_INCREMENT, username VARCHAR(255) UNIQUE NOT_NULL, name VARCHAR(255), email VARCHAR(255), age int, password VARCHAR(255), PRIMARY KEY(username))';
-    db.query(sql, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-        res.send('Posts table created');
-    });
-});
+// app.get('/createuserstable', (req, res) => {
+//     let sql = 'CREATE TABLE users(username VARCHAR(255) UNIQUE NOT NULL, name VARCHAR(255), email VARCHAR(255) UNIQUE NOT NULL, age int, password VARCHAR(255), PRIMARY KEY(username))';
+//     db.query(sql, (err, result) => {
+//         if(err) throw err;
+//         console.log(result);
+//         res.send('Users Table Created');
+//     });
+// });
 
 
 
