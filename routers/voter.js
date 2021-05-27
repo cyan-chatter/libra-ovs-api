@@ -28,7 +28,7 @@ var createRouter = (db) => {
     
     router.get('/vote/:electionid/:cId', verify(), async (req,res)=>{
         let tableName = `voting${req.params.electionId}`
-        let sql = `UPDATE ${tableName} SET votecount = votecount+1 WHERE cId = `
+        let sql = `UPDATE ${tableName} SET votecount = votecount+1 WHERE cId = ? AND votingStatus = 1`
         useQuery(db, sql, [req.params.cId])
         .then(()=>{
             res.status(200).send(result)
