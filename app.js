@@ -5,6 +5,7 @@ let db = require('./dbConnect')
 
 const entry = require('./routers/entry')
 const voter = require('./routers/voter')
+const useQuery = require('./useQuery')
 
 const port = process.env.PORT||3000
 
@@ -40,6 +41,37 @@ app.get('/electiondetails/:electionid', verify(), async (req,res)=>{
         res.status(500).send("Unable to Resolve the Request")
     })
 })
+
+app.get('/electionresult/:electionid', verify(), async (req,res)=>{
+    let tableName = `voting${req.params.electionId}`
+    let sql = `SELECT votingStatus FROM ${tableName} WHERE electionId = ?`
+    useQuery(db, sql, [req.params.electionId])
+    .then(()=>{
+        if(result[0].votingStatus === 0) res.status(500).send("Voting has not started yet")
+        else if(result[0].votingStatus === 1) res.status(500).send("Voting is currently going on")
+        let sql2 = `
+            SELECT a.cid, a.voteCount 
+            FROM ${tableName} a
+            INNER JOIN (
+                SELECT cid, MAX(voteCount) voteCount
+                FROM ${tableName}
+                GROUP BY cid
+            ) b ON a.cid = b.cid AND a.voteCount = b.voteCount 
+        `
+        useQuery(db,sql2)
+    })
+    .then((result)=>{
+        if(result.length < 0){
+            res.status(500).send("No Voters")    
+        }
+        res.status(200).send(result)
+    })
+    .catch((err)=>{
+        console.log(err)
+        res.status(500).send("Unable to Resolve the Request")
+    })
+})
+
 
 
 //Run Script Once
