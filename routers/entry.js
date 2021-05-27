@@ -2,8 +2,6 @@ const express = require('express');
 const auth = require('../auth');
 const db = require('../dbConnect');
 const verify = require('../verify')
-const util = require( 'util' );
-const { createCipher } = require('crypto');
 const useQuery = require('../useQuery')
 
 var validateEmailSyntax = (email) => {

@@ -4,6 +4,7 @@ const path = require('path')
 let db = require('./dbConnect')
 
 const entry = require('./routers/entry')
+const voter = require('./routers/voter')
 
 const port = process.env.PORT||3000
 
@@ -16,14 +17,30 @@ app.use(express.static(publicDirectoryPath))
 
 //Using the Routes Here
 //----------------
-
-
 app.use(entry(db))
+
+//app.use(voter(db))
+
+
 //----------------
 
 app.get('/', (_, res) => {
     res.send("Welcome to Libra - an API for Online Voting")
 })
+
+app.get('/electiondetails/:electionid', verify(), async (req,res)=>{
+    let tableName = `voting${req.params.electionId}`
+    let sql = `SELECT * FROM ${tableName}`
+    useQuery(db, sql, [req.params.electionId])
+    .then(()=>{
+        res.status(200).send(result)
+    })
+    .catch((err)=>{
+        console.log(err)
+        res.status(500).send("Unable to Resolve the Request")
+    })
+})
+
 
 //Run Script Once
 //----------------------------------------------------------------------------------------
