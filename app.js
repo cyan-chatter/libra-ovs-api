@@ -31,14 +31,16 @@ app.get('/', (_, res) => {
     res.send("Welcome to Libra - an API for Online Voting")
 })
 
-//Run Script Once
-//----------------------------------------------------------------------------------------
-
 let table1 = 'election_records';
 let table2 = 'users';
 let table3 = 'voters';
 let table4 = 'candidates';
 let table5 = 'user_tokens';
+
+
+//Run Script Once
+//----------------------------------------------------------------------------------------
+
 
 let sql1 = `CREATE TABLE ${table1} (eid varchar(255) UNIQUE NOT NULL, cond_id varchar(255) NOT NULL, when varchar(60) NOT NULL, duration int NOT NULL, post varchar(60), elec_status int NOT NULL, PRIMARY KEY(eid))`;
 let sql2 = `CREATE TABLE ${table2} (username varchar(255) UNIQUE NOT NULL, name varchar(60) NOT NULL, email varchar(60) UNIQUE NOT NULL, age int, password varchar(255) NOT NULL, org_id varchar(60) NOT NULL, PRIMARY KEY(username)`;
@@ -93,6 +95,49 @@ app.get('/createtable5', (req, res) => {
 
 
 //----------------------------------------------------------------------------------------
+
+
+
+app.get('/election/:eid', verify(), async (req,res)=>{
+    let sql = `SELECT * FROM ${table1}`
+    useQuery(db, sql, [req.params.eid])
+    .then(()=>{
+        res.status(200).send(result)
+    })
+    .catch((err)=>{
+        console.log(err)
+        res.status(500).send("Unable to Resolve the Request")
+    })
+})
+
+app.get('/results/:eid', verify(), async (req,res)=>{
+    let sql = `SELECT elec_status FROM ${table1} WHERE eid = ?`
+    useQuery(db, sql, [req.params.eid])
+    .then(()=>{
+        if(result[0].elec_status === 0) res.status(500).send("Voting has not started yet")
+        else if(result[0].elec_status === 1) res.status(500).send("Voting is currently going on")
+        let sql2 = `
+            SELECT a.username, a.vote_count 
+            FROM ${table4} a
+            INNER JOIN (
+                SELECT username, MAX(vote_count) vote_count 
+                FROM ${table4}
+                GROUP BY username
+            ) b ON a.username = b.username AND a.vote_count = b.vote_count
+        `
+        useQuery(db,sql2)
+        .then((result2)=>{
+            if(result2.length < 0){
+                res.status(500).send("No Voters")    
+            }
+            res.status(200).send(result2)
+        })
+    })
+    .catch((err)=>{
+        console.log(err)
+        res.status(500).send("Unable to Resolve the Request")
+    })
+})
 
 
 
