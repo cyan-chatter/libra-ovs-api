@@ -14,12 +14,13 @@ const verify = ()=>{
                     return res.status(401).send("Invalid Credentials")        
                 } 
                 user = result[0];
-                let tablename = `userTokensFor${user.username}`
-                let sql = `SELECT * FROM ${tablename} WHERE token = ?`
-                db.query(sql,[token],(err,result)=>{
+                // let tablename = `userTokensFor${user.username}`
+                // let sql = `SELECT * FROM ${tablename} WHERE token = ?`
+                let sql = `SELECT username FROM user_tokens WHERE username = ? AND token = ?`
+                db.query(sql,[user.username, token],(err,result)=>{
                     if(err) throw err;
                     console.log(result);
-                    if(result.length <= 0){
+                    if(result.length === 0){
                         return res.status(401).send("Invalid Credentials")
                     }
                     req.token = token

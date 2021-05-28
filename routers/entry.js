@@ -1,10 +1,8 @@
 const express = require('express');
 const auth = require('../auth');
 const db = require('../dbConnect');
-const verify = require('../verify')
-const util = require( 'util' );
-const { createCipher } = require('crypto');
-const useQuery = require('../useQuery')
+const verify = require('../verify');
+const useQuery = require('../useQuery');
 
 var validateEmailSyntax = (email) => {
     let dot=0, atr=0;
@@ -93,14 +91,15 @@ var createRouter =  function (config){
                 db.query(sql1, userData, (err, result) => {
                     if(err) throw err;
                     console.log(result);
-                    const tableName = 'userTokensFor' + userData.username
-                    let sql2 = `CREATE TABLE ${tableName}(token VARCHAR(255))`;
+                    res.status(200).send('User Added Successfully');
+                    // const tableName = 'userTokensFor' + userData.username
+                    // let sql2 = `CREATE TABLE ${tableName}(token VARCHAR(255))`;
                     
-                    db.query(sql2, (err,result)=>{
-                        if(err) throw err;
-                        console.log(result);
-                        res.status(200).send('User Added Successfully');
-                    })
+                    // db.query(sql2, (err,result)=>{
+                    //     if(err) throw err;
+                    //     console.log(result);
+                    //     res.status(200).send('User Added Successfully');
+                    // })
                 })
             })
         })
@@ -125,9 +124,10 @@ var createRouter =  function (config){
             const isMatch = await auth.comparePassword(word, hash);
             if(isMatch){
                 token = auth.generateAuthToken(user)
-                let tableName = `userTokensFor${user.username}`
-                let sql2 = `INSERT INTO ${tableName} VALUES (?)` 
-                db.query(sql2, [token], (err,result)=>{
+                // let tableName = `userTokensFor${user.username}`
+                // let sql2 = `INSERT INTO ${tableName} VALUES (?)` 
+                let sql2 = `INSERT INTO user_tokens (username, token) VALUES (?, ?)` 
+                db.query(sql2, [req.body.username, token], (err,result)=>{
                     if(err){
                         console.log(err);
                         throw err;
@@ -137,6 +137,7 @@ var createRouter =  function (config){
                         username : user.username,
                         name : user.name,
                         email : user.email,
+                        org_id : user.org_id,
                         token
                     }
                     res.status(200).send({user : userData})
@@ -147,15 +148,15 @@ var createRouter =  function (config){
     })
 
     router.get('/logout', verify(), async (req,res)=>{
-        let tableName = `userTokensFor${req.user.username}`
-        let sql = `DELETE FROM ${tableName} WHERE token = ?`
-        db.query(sql, [req.token], (err,result)=>{
+        //let tableName = `userTokensFor${req.user.username}`
+        //let sql = `DELETE FROM ${tableName} WHERE token = ?`
+        let sql = `DELETE FROM user_tokens WHERE username = ? AND token = ?`
+        db.query(sql, [req.user.username, req.token], (err,result)=>{
             if(err) throw err;
             console.log(result)
             res.status(200).send("User is Logged Out")
         })
     })
-
 
     return router
 }

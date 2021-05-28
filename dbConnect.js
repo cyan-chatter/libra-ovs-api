@@ -2,13 +2,13 @@ const mysql = require('mysql')
 
 const dbrootpass = process.env.DBROOTPASS||'thunder7'
 
-const dbname = process.env.DBNAME||'libradevdb' // set dbname
+const dbname = process.env.DBNAME||'libradevdbmain' // set dbname
 
 const db = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
     password : dbrootpass 
-    ,database : dbname //comment this line if new db dbname is to be created
+    //,database : dbname //comment this line if new db dbname is to be created
 })
 
 db.connect((err) => {
