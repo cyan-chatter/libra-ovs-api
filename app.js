@@ -3,6 +3,8 @@ const path = require('path')
 
 let db = require('./dbConnect')
 
+const verify = require('./verify')
+
 const entry = require('./routers/entry')
 const conduct = require('./routers/conduct')
 const candidate = require('./routers/candidate')
@@ -42,11 +44,11 @@ let table5 = 'user_tokens';
 //----------------------------------------------------------------------------------------
 
 
-let sql1 = `CREATE TABLE ${table1} (eid varchar(255) UNIQUE NOT NULL, cond_id varchar(255) NOT NULL, when varchar(60) NOT NULL, duration int NOT NULL, post varchar(60), elec_status int NOT NULL, PRIMARY KEY(eid))`;
-let sql2 = `CREATE TABLE ${table2} (username varchar(255) UNIQUE NOT NULL, name varchar(60) NOT NULL, email varchar(60) UNIQUE NOT NULL, age int, password varchar(255) NOT NULL, org_id varchar(60) NOT NULL, PRIMARY KEY(username)`;
-let sql3 = `CREATE TABLE ${table3} (username varchar(255) NOT NULL, eid varchar(255) NOT NULL, vote_time varchar(60), PRIMARY KEY(username, eid))`; //make f key
-let sql4 = `CREATE TABLE ${table4} (username varchar(255) NOT NULL, eid varchar(255) NOT NULL, name varchar(60), vote_count int, PRIMARY KEY(username, eid))`; // make f key
-let sql5 = `CREATE TABLE ${table5} (username varchar(255) NOT NULL, token varchar(255) NOT NULL, PRIMARY KEY(username, token))` // make f key
+let sql1 = `CREATE TABLE ${table1} (eid VARCHAR(255) UNIQUE NOT NULL, cond_id VARCHAR(255) NOT NULL, when VARCHAR(60) NOT NULL, duration int NOT NULL, post VARCHAR(60), elec_status int NOT NULL, PRIMARY KEY(eid))`;
+let sql2 = `CREATE TABLE ${table2} (username VARCHAR(255) UNIQUE NOT NULL, name VARCHAR(60) NOT NULL, email VARCHAR(60) UNIQUE NOT NULL, age int, password VARCHAR(255) NOT NULL, org_id VARCHAR(60) NOT NULL, PRIMARY KEY(username)`;
+let sql3 = `CREATE TABLE ${table3} (username VARCHAR(255) NOT NULL, eid VARCHAR(255) NOT NULL, vote_time VARCHAR(60), PRIMARY KEY(username, eid))`; //make f key
+let sql4 = `CREATE TABLE ${table4} (username VARCHAR(255) NOT NULL, eid VARCHAR(255) NOT NULL, name VARCHAR(60), vote_count int, PRIMARY KEY(username, eid))`; // make f key
+let sql5 = `CREATE TABLE ${table5} (username VARCHAR(255) NOT NULL, token VARCHAR(255) NOT NULL, PRIMARY KEY(username, token))` // make f key
 
 app.get('/createtable1', (req, res) => {
     
