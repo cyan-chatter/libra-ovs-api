@@ -22,8 +22,8 @@ var createRouter = (db) => {
         let sql4 = 'INSERT INTO candidates (username, eid, vote_count) VALUES '
         let sql5 = 'INSERT INTO voters (username, eid) VALUES '
         
-        let voters=[],org;
-        let unixTime = Math.round((new Date()).getTime() / 1000);
+        let voters=[],org,x;
+        let unixTime = Math.round((new Date()).getTime() / 1000)
         let eid = unixTime.toString() + req.user.username
         let eData = {
             eid,
@@ -38,15 +38,17 @@ var createRouter = (db) => {
         }
         if(req.params.method === "org" && req.params.orgId === null) return res.status(400).send("Error")
         
-        if(req.params.method === "manual") org = "NULL" 
+        if(req.params.method === "manual"){
+            org = "NULL" 
+            if(req.body.voters === null || req.body.voters.length === 0) return res.status(500).send("Enter Atleast a single Voter")
+        } 
         else org = req.params.orgId
-
+        if(eData.elec_time <= unixTime) return res.status(400).send("Error: The Specified Time Has Already Passed")
         useQuery(db, sql1, [org, req.user.username])
         .then((result1)=>{
             console.log("Query 1: ", result1)
             if(req.params.method === "manual"){
                 voters = req.body.voters
-                if(voters.length === 0) return res.status(500).send("Enter Atleast a single Voter")
             }
             else{
                 if(result1.length === 0) return res.status(500).send("There is no one in your Organization")
