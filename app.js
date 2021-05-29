@@ -44,13 +44,11 @@ let table5 = 'user_tokens';
 //----------------------------------------------------------------------------------------
 
 
-let sql1 = `CREATE TABLE ${table1} (eid VARCHAR(255) PRIMARY KEY, cond_id VARCHAR(255) NOT NULL, elec_time int(11) NOT NULL, duration int NOT NULL, post VARCHAR(60))`;
-//create cond_id as Foreign key
-
+let sql1 = `CREATE TABLE ${table1} (eid VARCHAR(255) PRIMARY KEY, cond_id VARCHAR(255) FOREIGN KEY REFERENCES election_records(eid), elec_time int(11) NOT NULL, duration int NOT NULL, post VARCHAR(60))`;
 let sql2 = `CREATE TABLE ${table2} (username VARCHAR(255) UNIQUE NOT NULL, name VARCHAR(60) NOT NULL, email VARCHAR(60) UNIQUE NOT NULL, age int, password VARCHAR(255) NOT NULL, org_id VARCHAR(60) NOT NULL, PRIMARY KEY(username)`;
-let sql3 = `CREATE TABLE ${table3} (username VARCHAR(255) FOREIGN KEY REFERENCES users, eid VARCHAR(255) FOREIGN KEY REFERENCES election_records, vote_time int(11), PRIMARY KEY(username, eid))`; 
-let sql4 = `CREATE TABLE ${table4} (username VARCHAR(255) FOREIGN KEY REFERENCES users, eid VARCHAR(255) FOREIGN KEY REFERENCES election_records, name VARCHAR(60), vote_count int, PRIMARY KEY(username, eid))`; 
-let sql5 = `CREATE TABLE ${table5} (username VARCHAR(255) FOREIGN KEY REFERENCES users, token VARCHAR(255) NOT NULL, PRIMARY KEY(username, token))`
+let sql3 = `CREATE TABLE ${table3} (username VARCHAR(255) FOREIGN KEY REFERENCES users(username), eid VARCHAR(255) FOREIGN KEY REFERENCES election_records(eid), vote_time int(11), PRIMARY KEY(username, eid))`; 
+let sql4 = `CREATE TABLE ${table4} (username VARCHAR(255) FOREIGN KEY REFERENCES users(username), eid VARCHAR(255) FOREIGN KEY REFERENCES election_records(eid), name VARCHAR(60), vote_count int, PRIMARY KEY(username, eid))`; 
+let sql5 = `CREATE TABLE ${table5} (username VARCHAR(255) FOREIGN KEY REFERENCES users(username), token VARCHAR(255) NOT NULL, PRIMARY KEY(username, token))`
 
 app.get('/createtable1', (req, res) => {
     
