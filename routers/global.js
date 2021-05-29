@@ -3,6 +3,7 @@ const useQuery = require('../useQuery');
 const verify = require('../verify');
 const determineElectionStatus = require('../elecStatus')
 
+
 var createRouter = (db) => {
     var router = express.Router();
     
@@ -33,14 +34,38 @@ var createRouter = (db) => {
             let status,resp
             status = determineElectionStatus(result[0].elec_time, result[0].duration)
             resp = {...result, ...status}
-            res.status(200).send(resp)
+            return res.status(200).send(resp)
         })
         .catch((err)=>{
             console.log(err)
-            res.status(500).send("Unable to Resolve the Request")
+            return res.status(500).send("Unable to Resolve the Request")
         })
     })
     
+    router.get('/elections/:eid/candidates', verify(), (req, res) => {
+        let sql = `SELECT elec_time, duration FROM election_records WHERE eid = ?`;
+        let sql2 = `SELECT username FROM candidates WHERE eid = ?`;
+        let start_time, duration, status; 
+        useQuery(db, sql, [req.params.eid])
+        .then((result)=>{
+            if(result.length === 0 || result.length > 1) return res.status(500).send("Error");
+            start_time = result[0].elec_time
+            duration = result[0].duration
+            status = determineElectionStatus(start_time,duration)
+            useQuery(db, sql2, [req.params.eid])
+            .then((candidates) => {
+                console.log(candidates);
+                let resp = {
+                    start_time,
+                    duration,
+                    ...status,
+                    candidates
+                }
+                return res.status(200).send(resp);
+            })
+        })
+    })
+
     router.get('/results/:eid', verify(), async (req,res)=>{
         let sql = 'SELECT elec_time, duration FROM election_records WHERE eid = ?'
         useQuery(db, sql, [req.params.eid])
@@ -54,19 +79,19 @@ var createRouter = (db) => {
 
             useQuery(db,sql2,[req.params.eid])
             .then((result2)=>{
-                if(result2.length < 0){
-                    res.status(500).send("No Voters in the Election")    
+                if(result2.length === 0){
+                    return res.status(500).send("No Voters in the Election")    
                 }
                 let resp = {
                     ...status,
                     ...result2
                 }
-                res.status(200).send(resp)
+                return res.status(200).send(resp)
             })
         })
         .catch((err)=>{
             console.log(err)
-            res.status(500).send("Unable to Resolve the Request")
+            return res.status(500).send("Unable to Resolve the Request")
         })
     })
     

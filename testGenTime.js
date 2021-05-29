@@ -1,8 +1,15 @@
-const date = new Date(2021, 5, 29, 19, 37, 19)
-//year, month, day, hours, minutes, and seconds
+const d = new Date(2021, 4, 29, 22, 18, 0)
+//year, monthIndex, day, hours, minutes, and seconds - according to local timezone
 
-let is = Math.round(date.getTime() / 1000)
-let cs = Math.round((new Date()).getTime() / 1000)
+console.log(d)
+
+let is = Math.round(d.getTime() / 1000)
+
+let cd = new Date()
+let cs = Math.round(cd.getTime() / 1000)
+//according to UTC
+
+console.log(cd)
 
 console.log(is)
 
