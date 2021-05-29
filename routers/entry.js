@@ -82,7 +82,8 @@ var createRouter =  function (db){
                     name : req.body.name,
                     email : req.body.email,
                     age : req.body.age,
-                    password : hashedPassword
+                    password : hashedPassword,
+                    org_id : req.body.org_id
                 }
 
                 let sql1 = 'INSERT INTO users SET ?';

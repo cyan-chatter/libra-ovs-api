@@ -22,7 +22,7 @@ var createRouter = (db) => {
         let sql4 = 'INSERT INTO candidates (username, eid, vote_count) VALUES '
         let sql5 = 'INSERT INTO voters (username, eid) VALUES '
         
-        let voters,org;
+        let voters=[],org;
         let unixTime = Math.round((new Date()).getTime() / 1000);
         let eid = unixTime.toString() + req.user.username
         let eData = {
@@ -42,15 +42,15 @@ var createRouter = (db) => {
         else org = req.params.orgId
 
         useQuery(db, sql1, [org, req.user.username])
-        .then((result)=>{
-            console.log(result)
+        .then((result1)=>{
+            console.log("Query 1: ", result1)
             if(req.params.method === "manual"){
                 voters = req.body.voters
                 if(voters.length === 0) return res.status(500).send("Enter Atleast a single Voter")
             }
             else{
-                if(result.length === 0) return res.status(500).send("There is no one in your Organization")
-                result.map((x)=>{
+                if(result1.length === 0) return res.status(500).send("There is no one in your Organization")
+                result1.map((x)=>{
                     voters.push(x.username)
                 })
             }
@@ -62,16 +62,18 @@ var createRouter = (db) => {
                 console.log(result)
                 let str='';
                 req.body.candidates.map((x,i) => {
-                    str += `(${x}, ${eid}, 0)`
+                    str += `('${x}', '${eid}', 0)`
                     if(i !== req.body.candidates.length - 1) str += `, `
                 })
                 sql4 += str
                 let str2='';
                 voters.map((x,i)=>{
-                    str2 += `(${x}, ${eid})`
+                    str2 += `('${x}', '${eid}')`
                     if(i !== voters.length - 1) str2 += `, `
                 })
                 sql5 += str2
+                console.log("SQL Candidates :", sql4)
+                console.log("SQL Voters : ", sql5)
 
                 useQuery(db,sql4)
                 .then((result2)=>{

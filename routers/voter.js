@@ -15,21 +15,21 @@ var createRouter = (db) => {
         useQuery(db, sql, [req.user.username])
         .then((result) => {
             console.log(result);
-            const resp = result.map((x)=>{
+            result.map((x)=>{
                 let status = determineElectionStatus(x.elec_time, x.duration)
                 x = {...x, ...status}    
             })
-            res.status(200).send(resp);
+            res.status(200).send(result);
         })
     })
 
-    router.get('/voter/:eid', verify(), (req, res) => {
+    router.get('/vote/candidates/:eid', verify(), (req, res) => {
         let sql = `SELECT elec_time, duration FROM ${table3} WHERE eid = ?`;
-        let sql2 = `SELECT name, username FROM ${table2} WHERE eid = ?`;
+        let sql2 = `SELECT username FROM ${table2} WHERE eid = ?`;
         let start_time, duration, status; 
         useQuery(db, sql, [req.params.eid])
         .then((result)=>{
-            if(result.length === 0 && result.length > 1) res.status(500).send("Error");
+            if(result.length === 0 || result.length > 1) return res.status(500).send("Error");
             start_time = result[0].elec_time
             duration = result[0].duration
             status = determineElectionStatus(start_time,duration)
@@ -47,7 +47,7 @@ var createRouter = (db) => {
         })
     })
 
-    router.get('/voter/:eid/:cid', verify(), (req, res) => {
+    router.get('/vote/:eid/:cid', verify(), (req, res) => {
         let sql2 = `SELECT vote_time FROM ${table1} WHERE username = ? AND eid = ?`;
         let sql = `UPDATE ${table2} SET vote_count = vote_count + 1 WHERE username = ? AND eid = ?`;
         let sql3 = `SELECT elec_time, duration FROM ${table3} WHERE eid = ?`;
@@ -60,7 +60,9 @@ var createRouter = (db) => {
             useQuery(db,sql2,[req.user.username, req.params.eid])    
             .then((result)=>{
                 //check if this works
-                if(result.length > 0) return res.status(500).send("Vote has already been casted");
+                console.log("Voting To a Candidate:", result)
+                if(result.length === 0 || result.length > 1) return res.status(500).send("Error");
+                if(result[0].vote_time !== null) return res.status(500).send("Vote has already been casted");
                 useQuery(db, sql, [req.params.cid, req.params.eid])
                 .then((result) => {
                     console.log(result);

@@ -20,8 +20,8 @@ app.use(express.static(publicDirectoryPath))
 
 //Uncomment Only During Creating the DB Structure
 //-----------------------------------------------
-//const init = require('./routers/init')
-//app.use(init(db))
+// const init = require('./routers/init')
+// app.use(init(db))
 //-----------------------------------------------
 
 
