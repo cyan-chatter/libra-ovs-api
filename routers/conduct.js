@@ -16,13 +16,13 @@ var createRouter = (db) => {
     router.post('/conduct/:method/:orgId', verify(), (req, res) => {
         
         let sql1 = 'SELECT username FROM users WHERE org_id = ? AND username != ?'   
-        let sql2 = 'SELECT username FROM users WHERE username = ?'
         let sql3 = 'INSERT INTO election_records SET ?'
 
         let sql4 = 'INSERT INTO candidates (username, eid, vote_count) VALUES '
         let sql5 = 'INSERT INTO voters (username, eid) VALUES '
         
-        let voters=[],org,x;
+        let voters=[],org,x,orgUsers;
+        let extras = [];
         let unixTime = Math.round((new Date()).getTime() / 1000)
         let eid = unixTime.toString() + req.user.username
         let eData = {
@@ -57,7 +57,46 @@ var createRouter = (db) => {
                 })
             }
         })
-        //sql 2 check for all users ----pending----
+
+        .then(()=>{
+            let str3 = `SELECT username FROM users WHERE org_id = ? `
+            useQuery(db,str3,[org])
+            .then((result)=>{
+                if(result.length === 0) return res.status(500).send("There is no one in your Organization")
+                orgUsers = result
+            })
+            .then(()=>{
+                let f = 0;
+                req.body.candidates.map((x)=>{
+                    for(let i=0; i<orgUsers.length; ++i){
+                        if(x === orgUsers[i].username){
+                            f = 1;
+                            break;
+                        }
+                    }
+                    if(f !== 1) extras.push(x)
+                    f = 0;
+                })
+                voters.map((x)=>{
+                    for(let i=0; i<orgUsers.length; ++i){
+                        if(x === orgUsers[i].username){
+                            f = 1;
+                            break;
+                        }
+                    }
+                    if(f !== 1) extras.push(x)
+                    f = 0;
+                })
+            })
+            .then(()=>{
+                if(extras.length !== 0){
+                    return res.status(400).send({
+                        invalidUsernames : extras, 
+                        message : "These Users Don't Exist in The Database" 
+                    })
+                } 
+            })
+        })
         .then(()=>{
             useQuery(db,sql3,eData)
             .then((result)=>{
