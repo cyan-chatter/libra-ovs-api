@@ -75,11 +75,12 @@ var createRouter = (db) => {
             let status = determineElectionStatus(result[0].elec_time, result[0].duration)
             if(status.status_code === 0) return  res.status(500).send(status)
             
-            let sql2 = `SELECT username, vote_count FROM candidates WHERE eid = ? AND vote_count = (SELECT MAX(vote_count) FROM candidates)`
+            let sql2 = `SELECT username, vote_count FROM candidates WHERE eid = ? AND vote_count = (SELECT MAX(vote_count) FROM candidates WHERE eid = ?)`
 
-            useQuery(db,sql2,[req.params.eid])
+            useQuery(db,sql2,[req.params.eid, req.params.eid])
             .then((result2)=>{
                 if(result2.length === 0){
+                    console.log(result2)
                     return res.status(500).send("No Voters in the Election")    
                 }
                 let resp = {

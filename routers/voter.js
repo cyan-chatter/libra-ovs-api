@@ -38,7 +38,6 @@ var createRouter = (db) => {
             if(status.status_code === 2) res.status(500).send(status);
             useQuery(db,sql2,[req.user.username, req.params.eid])    
             .then((result)=>{
-                //check if this works
                 console.log("Voting To a Candidate:", result)
                 if(result.length === 0 || result.length > 1) return res.status(500).send("Error");
                 if(result[0].vote_time !== null) return res.status(500).send("Vote has already been casted");
