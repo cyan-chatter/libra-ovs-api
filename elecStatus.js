@@ -1,10 +1,11 @@
-const determineElectionStatus = (start_time,duration) => {
+const determineElectionStatus = (start_time,durationM) => {
     let ts = Math.round((new Date()).getTime() / 1000);
     if(ts < start_time) return {
         status_code : 0,
         status_message : "Scheduled",
         status_description : "Voting Phase Not Started Yet"
-    } 
+    }
+    let duration = durationM*60 
     if(ts >= start_time && ts < (start_time + duration) ) return {
         status_code : 1,
         status_message : "Running",

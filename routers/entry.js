@@ -1,6 +1,5 @@
 const express = require('express');
 const auth = require('../auth');
-//const db = require('../dbConnect');
 const verify = require('../verify');
 const useQuery = require('../useQuery');
 
@@ -25,21 +24,20 @@ var validateUsernameSyntax = (un) =>{
     return true;
 }
 
-var isUsernameAlreadyTaken = async (un) => {
+var isUsernameAlreadyTaken = async (db,un) => {
     let sql = 'SELECT * FROM users WHERE username = ?'
     return useQuery(db, sql, [un])
 }
 
-var isEmailAreadyUsed = async (email) => {
+var isEmailAreadyUsed = async (db,email) => {
     let sql = 'SELECT * FROM users WHERE email = ?'
     return useQuery(db, sql, [email])
 }
 
-var createRouter =  function (config){
+var createRouter =  function (db){
     var router =  express.Router()
     
     router.get('/about', (req,res)=>{
-        let db = config
         res.send("This works, Can't log or send db as it is a circular structure but can use it")
     })
 
@@ -53,7 +51,7 @@ var createRouter =  function (config){
             return res.status(400).send('Invalid Username Syntax')
         }
         let d1;
-        isUsernameAlreadyTaken(req.body.username)
+        isUsernameAlreadyTaken(db,req.body.username)
         .then(result=>{
             console.log("username check runs", result);
             if(result.length > 0) d1 = true;
@@ -64,7 +62,7 @@ var createRouter =  function (config){
                 return res.status(409).send('Username Alerady Taken')
             }
             let d2; 
-            isEmailAreadyUsed(req.body.email)
+            isEmailAreadyUsed(db,req.body.email)
             .then(result=>{
                 console.log("email check runs", result);
                 if(result.length > 0) d2 = true;
@@ -142,6 +140,8 @@ var createRouter =  function (config){
                     }
                     res.status(200).send({user : userData})
                 })        
+            }else{
+                res.status(400).send("Incorrect Password")
             }
         })
 

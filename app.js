@@ -3,7 +3,6 @@ const path = require('path')
 
 let db = require('./dbConnect')
 
-const init = require('./routers/init')
 const global = require('./routers/global')
 const entry = require('./routers/entry')
 const conduct = require('./routers/conduct')
@@ -19,9 +18,13 @@ app.use(express.json())
 const publicDirectoryPath = path.join(__dirname, '../public')
 app.use(express.static(publicDirectoryPath))
 
-//Using the Routes Here
+//Uncomment Only During Creating the DB Structure
+//-----------------------------------------------
+//const init = require('./routers/init')
+//app.use(init(db))
+//-----------------------------------------------
 
-app.use(init(db))
+
 app.use(global(db))
 app.use(entry(db))
 app.use(conduct(db))

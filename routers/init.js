@@ -18,7 +18,7 @@ var createRouter = (db) => {
 
     let sql3 = `CREATE TABLE ${table3} (username VARCHAR(255), eid VARCHAR(255), vote_time int(11), FOREIGN KEY(username) REFERENCES users(username), FOREIGN KEY(eid) REFERENCES election_records(eid), PRIMARY KEY(username, eid))`; 
 
-    let sql4 = `CREATE TABLE ${table4} (username VARCHAR(255), eid VARCHAR(255), name VARCHAR(60), vote_count int, FOREIGN KEY(username) REFERENCES users(username), FOREIGN KEY(eid) REFERENCES election_records(eid), PRIMARY KEY(username, eid))`; 
+    let sql4 = `CREATE TABLE ${table4} (username VARCHAR(255), eid VARCHAR(255), vote_count int, FOREIGN KEY(username) REFERENCES users(username), FOREIGN KEY(eid) REFERENCES election_records(eid), PRIMARY KEY(username, eid))`; 
 
     let sql5 = `CREATE TABLE ${table5} (username VARCHAR(255), token VARCHAR(255) NOT NULL, FOREIGN KEY(username) REFERENCES users(username), PRIMARY KEY(username, token))`
 

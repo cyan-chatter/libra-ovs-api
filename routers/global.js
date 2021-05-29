@@ -1,4 +1,3 @@
-//const db = require('../dbConnect');
 const express = require('express');
 const useQuery = require('../useQuery');
 const verify = require('../verify');
@@ -7,7 +6,7 @@ const determineElectionStatus = require('../elecStatus')
 var createRouter = (db) => {
     var router = express.Router();
     
-    app.get('/election/:eid', verify(), async (req,res)=>{
+    router.get('/election/:eid', verify(), async (req,res)=>{
         let sql = 'SELECT * FROM election_records'
         useQuery(db, sql, [req.params.eid])
         .then(()=>{
@@ -24,7 +23,7 @@ var createRouter = (db) => {
         })
     })
     
-    app.get('/results/:eid', verify(), async (req,res)=>{
+    router.get('/results/:eid', verify(), async (req,res)=>{
         let sql = 'SELECT elec_time, duration FROM election_records WHERE eid = ?'
         useQuery(db, sql, [req.params.eid])
         .then(()=>{

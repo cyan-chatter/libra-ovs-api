@@ -1,4 +1,3 @@
-//const db = require('../dbConnect');
 const express = require('express');
 const useQuery = require('../useQuery');
 const verify = require('../verify');
