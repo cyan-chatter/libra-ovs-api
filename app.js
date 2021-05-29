@@ -3,7 +3,7 @@ const path = require('path')
 
 let db = require('./dbConnect')
 
-const global = require('./routers/global')
+const election = require('./routers/election')
 const entry = require('./routers/entry')
 const conduct = require('./routers/conduct')
 const candidate = require('./routers/candidate')
@@ -25,7 +25,7 @@ app.use(express.static(publicDirectoryPath))
 //-----------------------------------------------
 
 
-app.use(global(db))
+app.use(election(db))
 app.use(entry(db))
 app.use(conduct(db))
 app.use(voter(db))
