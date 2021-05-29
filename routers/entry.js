@@ -1,6 +1,6 @@
 const express = require('express');
 const auth = require('../auth');
-const db = require('../dbConnect');
+//const db = require('../dbConnect');
 const verify = require('../verify');
 const useQuery = require('../useQuery');
 
