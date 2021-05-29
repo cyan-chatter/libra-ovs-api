@@ -48,25 +48,20 @@ var createRouter = (db) => {
             if(result.length === 0) return res.status(500).send("No Election with This Election ID")
             if(result.length > 1) return  res.status(500).send("Unable to Resolve the Request")
             let status = determineElectionStatus(result[0].elec_time, result[0].duration)
-            if(status.status_code === 0) return  res.status(500).send("Voting has not started yet")
-            else if(status.status_code === 1) return  res.status(400).send("Voting is currently going on")
+            if(status.status_code === 0) return  res.status(500).send(status)
+            
+            let sql2 = `SELECT username, vote_count FROM candidates WHERE eid = ? AND vote_count = (SELECT MAX(vote_count) FROM candidates)`
 
-            // let sql2 = `
-            //     SELECT username, vote_count 
-            //     FROM candidates WHERE eid = ?
-            //     INNER JOIN (
-            //         SELECT username, MAX(vote_count) AS vote_count 
-            //         FROM candidates WHERE eid = ?
-            //         GROUP BY username 
-            //     ) b ON username = b.username AND vote_count = b.vote_count
-            // `
-
-            useQuery(db,sql2,[req.params.eid, req.params.eid])
+            useQuery(db,sql2,[req.params.eid])
             .then((result2)=>{
                 if(result2.length < 0){
                     res.status(500).send("No Voters in the Election")    
                 }
-                res.status(200).send(result2)
+                let resp = {
+                    ...status,
+                    ...result2
+                }
+                res.status(200).send(resp)
             })
         })
         .catch((err)=>{
