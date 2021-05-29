@@ -22,15 +22,15 @@ var createRouter = (db) => {
         let sql4 = 'INSERT INTO candidates SET ?';
         let sql5 = 'INSERT INTO voters SET ?';
         
-        //eid , cond_id, when, duration, post, elec_status
         let voters;
+        let unixTime = Math.round((new Date()).getTime() / 1000);
+        let eid = unixTime.toString() + req.user.username
         let eData = {
-            eid : '',
+            eid,
             cond_id : req.user.username,
             when : req.body.time,
             duration : req.body.duration,
-            post : req.body.post,
-            elec_status : 0,
+            post : req.body.post            
         }
         if(req.body.candidates === null || req.body.candidates.length < 2){
             return res.status(400).send("Enter atleast two candidates")
