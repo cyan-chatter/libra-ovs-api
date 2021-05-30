@@ -21,7 +21,7 @@ var createRouter = (db) => {
         let sql4 = 'INSERT INTO candidates (username, eid, vote_count) VALUES '
         let sql5 = 'INSERT INTO voters (username, eid) VALUES '
         
-        let voters=[],org,x,orgUsers;
+        let voters=[],org,orgUsers;
         let extras = [];
         let unixTime = Math.round((new Date()).getTime() / 1000)
         let eid = unixTime.toString() + req.user.username
@@ -47,6 +47,7 @@ var createRouter = (db) => {
         useQuery(db, sql1, [org, req.user.username])
         .then((result1)=>{
             console.log("Query 1: ", result1)
+            console.log("req.params.method: ",req.params.method)
             if(req.params.method === "manual"){
                 voters = req.body.voters
             }
@@ -56,17 +57,16 @@ var createRouter = (db) => {
                     voters.push(x.username)
                 })
             }
-        })
-
-        .then(()=>{
+            if(req.params.method === "manual") org = req.user.org_id
             let str3 = `SELECT username FROM users WHERE org_id = ? `
+            console.log(org)
             useQuery(db,str3,[org])
             .then((result)=>{
-                if(result.length === 0) return res.status(500).send("There is no one in your Organization")
+                console.log("P Result: ", result)
+                //if(result.length === 0) return res.status(500).send("There is no one in your Organization")
                 orgUsers = result
-            })
-            .then(()=>{
                 let f = 0;
+                console.log("req candidates", req.body.candidates)
                 req.body.candidates.map((x)=>{
                     for(let i=0; i<orgUsers.length; ++i){
                         if(x === orgUsers[i].username){
@@ -87,48 +87,44 @@ var createRouter = (db) => {
                     if(f !== 1) extras.push(x)
                     f = 0;
                 })
-            })
-            .then(()=>{
                 if(extras.length !== 0){
                     return res.status(400).send({
                         invalidUsernames : extras, 
                         message : "These Users Don't Exist in The Database" 
                     })
-                } 
-            })
-        })
-        .then(()=>{
-            useQuery(db,sql3,eData)
-            .then((result)=>{
-                console.log(result)
-                let str='';
-                req.body.candidates.map((x,i) => {
-                    str += `('${x}', '${eid}', 0)`
-                    if(i !== req.body.candidates.length - 1) str += `, `
-                })
-                sql4 += str
-                let str2='';
-                voters.map((x,i)=>{
-                    str2 += `('${x}', '${eid}')`
-                    if(i !== voters.length - 1) str2 += `, `
-                })
-                sql5 += str2
-                console.log("SQL Candidates :", sql4)
-                console.log("SQL Voters : ", sql5)
+                }
+                useQuery(db,sql3,eData)
+                .then((result)=>{
+                    console.log(result)
+                    let str='';
+                    req.body.candidates.map((x,i) => {
+                        str += `('${x}', '${eid}', 0)`
+                        if(i !== req.body.candidates.length - 1) str += `, `
+                    })
+                    sql4 += str
+                    let str2='';
+                    voters.map((x,i)=>{
+                        str2 += `('${x}', '${eid}')`
+                        if(i !== voters.length - 1) str2 += `, `
+                    })
+                    sql5 += str2
+                    console.log("SQL Candidates :", sql4)
+                    console.log("SQL Voters : ", sql5)
 
-                useQuery(db,sql4)
-                .then((result2)=>{
-                    console.log(result2)
-                    useQuery(db,sql5)
-                    .then((result3)=>{
-                        console.log(result3)
-                        let resp = {
-                            ...eData,
-                            candidates : req.body.candidates,
-                            voters,
-                            message : "Election Scheduled Successfully"
-                        }
-                        res.status(200).send(resp)
+                    useQuery(db,sql4)
+                    .then((result2)=>{
+                        console.log(result2)
+                        useQuery(db,sql5)
+                        .then((result3)=>{
+                            console.log(result3)
+                            let resp = {
+                                ...eData,
+                                candidates : req.body.candidates,
+                                voters,
+                                message : "Election Scheduled Successfully"
+                            }
+                            res.status(200).send(resp)
+                        })
                     })
                 })
             })
