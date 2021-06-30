@@ -176,6 +176,6 @@ Following tables are part of our database and here we showcase their connections
         - Since the LHS in the only functional dependency in the relation is a candidate key, the table is in Boyce-Codd Normal Form (BCNF).
 
 ### **E-R DIAGRAM**
-    ![image](https://user-images.githubusercontent.com/58657069/123927397-6e1d1700-d9aa-11eb-820c-ef87e7925bd2.png)
+![image](https://user-images.githubusercontent.com/58657069/123927397-6e1d1700-d9aa-11eb-820c-ef87e7925bd2.png)
 
 
